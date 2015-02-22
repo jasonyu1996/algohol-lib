@@ -1,6 +1,8 @@
 package algohol.judge.data.raw;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import algohol.com.DataIOInterface;
 
@@ -27,5 +29,11 @@ public class RawCode {
 	public void write(DataIOInterface io) throws IOException{
 		io.writeLine(type);
 		io.writeBytes(contents);
+	}
+	
+	public File writeToFile(String path) throws IOException{
+		File t = new File(path + "." + type);
+		Files.write(t.toPath(), contents);
+		return t;
 	}
 }

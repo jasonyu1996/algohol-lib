@@ -20,6 +20,13 @@ public class ProblemTestDataManager {
 			dir.mkdirs();
 	}
 	
+	public synchronized ProblemTestData getData(String id) throws IOException{
+		File workDir = new File(dir, id);
+		if(!workDir.exists())
+			return null;
+		return new ProblemTestData(workDir);
+	}
+	
 	public synchronized String getHashVal(String id) throws IOException{
 		BufferedReader reader = new BufferedReader(new FileReader(new File(dir, id + "/" + "MD5")));
 		String res = reader.readLine();
@@ -38,23 +45,28 @@ public class ProblemTestDataManager {
 		RawTestcaseData[] testcases = data.getTestcases();
 		BufferedWriter writer;
 		writer = new BufferedWriter(new FileWriter(new File(workDir, "config")));
+		//--------test cases------------------
 		writer.write(testcases.length + "\n");
+		for(int i = 0; i < testcases.length; i ++){
+			writer.write(testcases[i].getTimeLimit() + "\n");
+			writer.write(testcases[i].getMemoryLimit() + "\n");
+			Files.write(new File(workDir, "test" + i + ".in").toPath(), testcases[i].getInput());
+			Files.write(new File(workDir, "test" + i + ".out").toPath(), testcases[i].getOutput());
+		}
+		//--------redirect--------------------
 		writer.write((data.isRedirect() ? 1 : 0) + "\n");
 		if(data.isRedirect()){
 			writer.write(data.getInFile() + "\n");
 			writer.write(data.getOutFile() + "\n");
 		}
+		//--------checker---------------------
 		writer.write(data.getCheckerType() + "\n");
-		if(data.getCheckerType() == 1)
+		if(data.getCheckerType() == 1){
 			writer.write(data.getSpecialChecker().getType() + "\n");
+			data.getSpecialChecker().writeToFile(new File(workDir, "checker").toString());
+		}
 		writer.flush();
 		writer.close();
-		for(int i = 0; i < testcases.length; i ++){
-			Files.write(new File(workDir, "test" + i + ".in").toPath(), testcases[i].getInput());
-			Files.write(new File(workDir, "test" + i + ".out").toPath(), testcases[i].getOutput());
-		}
-		if(data.isRedirect())
-			Files.write(new File(workDir, "checker").toPath(), data.getSpecialChecker().getContents());
 	}
 	
 }
