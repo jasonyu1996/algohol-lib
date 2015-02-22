@@ -1,53 +1,52 @@
-package algohol.judge.data;
+package algohol.judge.data.raw;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Vector;
 
-public class ProblemTestData {
-	private Vector<TestcaseData> testcases;
+import algohol.com.DataIOInterface;
+
+public class RawProblemTestData {
+	private Vector<RawTestcaseData> testcases;
 	private boolean redirect;
 	private String inFile, outFile;
-	private Code specialChecker;
+	private RawCode specialChecker;
 	private int checkerType;
-	public ProblemTestData(BufferedReader in) throws IOException{
-		int tcnt = Integer.valueOf(in.readLine());
-		testcases = new Vector<TestcaseData>();
+	public RawProblemTestData(DataIOInterface io) throws IOException{
+		int tcnt = Integer.valueOf(io.readLine());
+		testcases = new Vector<RawTestcaseData>();
 		for(int i = 0; i < tcnt; i ++)
-			testcases.add(new TestcaseData(in));
-		int r = Integer.valueOf(in.readLine());
+			testcases.add(new RawTestcaseData(io));
+		int r = Integer.valueOf(io.readLine());
 		redirect = r != 0;
 		if(redirect){
-			inFile = in.readLine();
-			outFile = in.readLine();
+			inFile = io.readLine();
+			outFile = io.readLine();
 		}
-		checkerType = Integer.parseInt(in.readLine());
+		checkerType = Integer.parseInt(io.readLine());
 		if(checkerType == 1)
-			specialChecker = new Code(in);
+			specialChecker = new RawCode(io);
 	}
-	public String toString(){
-		StringBuilder res = new StringBuilder();
+	public void write(DataIOInterface io) throws IOException{
 		int tcnt = testcases.size();
-		res.append(tcnt + "\n");
+		io.writeLine(String.valueOf(tcnt));
 		for(int i = 0; i < tcnt; i ++)
-			res.append(testcases.elementAt(i));
+			testcases.elementAt(i).write(io);
 		if(redirect)
-			res.append("1\n");
+			io.writeLine("1");
 		else
-			res.append("0\n");
+			io.writeLine("0");
 		if(redirect){
-			res.append(inFile + "\n");
-			res.append(outFile + "\n");
+			io.writeLine(inFile);
+			io.writeLine(outFile);
 		}
-		res.append(checkerType + "\n");
+		io.writeLine(String.valueOf(checkerType));
 		if(checkerType == 1)
-			res.append(specialChecker);
-		return res.toString();
+			specialChecker.write(io);
 	}
-	public TestcaseData[] getTestcases() {
-		return (TestcaseData[])testcases.toArray();
+	public RawTestcaseData[] getTestcases() {
+		return (RawTestcaseData[])testcases.toArray();
 	}
 	public boolean isRedirect() {
 		return redirect;
@@ -58,7 +57,7 @@ public class ProblemTestData {
 	public String getOutFile() {
 		return outFile;
 	}
-	public Code getSpecialChecker() {
+	public RawCode getSpecialChecker() {
 		return specialChecker;
 	}
 	public int getCheckerType() {

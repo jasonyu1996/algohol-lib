@@ -6,6 +6,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+
+import algohol.judge.data.raw.RawProblemTestData;
+import algohol.judge.data.raw.RawTestcaseData;
 
 public class ProblemTestDataManager {
 	private File dir;
@@ -27,11 +31,11 @@ public class ProblemTestDataManager {
 		return new File(dir, id).exists();
 	}
 	
-	public synchronized void updateProblemTestData(String id, ProblemTestData data) throws IOException{
+	public synchronized void updateProblemTestData(String id, RawProblemTestData data) throws IOException{
 		File workDir = new File(dir, id);
 		if(!workDir.exists())
 			workDir.mkdir();
-		TestcaseData[] testcases = data.getTestcases();
+		RawTestcaseData[] testcases = data.getTestcases();
 		BufferedWriter writer;
 		writer = new BufferedWriter(new FileWriter(new File(workDir, "config")));
 		writer.write(testcases.length + "\n");
@@ -46,19 +50,11 @@ public class ProblemTestDataManager {
 		writer.flush();
 		writer.close();
 		for(int i = 0; i < testcases.length; i ++){
-			writer = new BufferedWriter(new FileWriter(new File(workDir, "test" + i + ".in")));
-			writer.write(testcases[i].getInput());
-			writer.close();
-			
-			writer = new BufferedWriter(new FileWriter(new File(workDir, "test" + i + ".out")));
-			writer.write(testcases[i].getOutput());
-			writer.close();
+			Files.write(new File(workDir, "test" + i + ".in").toPath(), testcases[i].getInput());
+			Files.write(new File(workDir, "test" + i + ".out").toPath(), testcases[i].getOutput());
 		}
-		if(data.isRedirect()){
-			writer = new BufferedWriter(new FileWriter(new File(workDir, "checker")));
-			writer.write(data.getSpecialChecker().getContents());
-			writer.close();
-		}
+		if(data.isRedirect())
+			Files.write(new File(workDir, "checker").toPath(), data.getSpecialChecker().getContents());
 	}
 	
 }
